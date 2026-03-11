@@ -32,11 +32,5 @@ services:
     volumes:
       - mongo_data:/data/db
 
-  redis:
-    container_name: compia_redis
-    image: redis:7
-    restart: unless-stopped
-    command: redis-server --maxmemory 100mb --maxmemory-policy allkeys-lru
-
 volumes:
   mongo_data: 

@@ -1,0 +1,1 @@
+from .firebase_conf import get_firebase_user_from_token
