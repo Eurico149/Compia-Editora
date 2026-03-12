@@ -1,16 +1,19 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
+from configs import mongo_connect
+from routers import admin_router
 import firebase_admin
 import os
 
 load_dotenv()
 
-
-app = FastAPI()
-
 cred = firebase_admin.credentials.Certificate("compia-editora-firebase-cred.json")
 firebase_admin.initialize_app(cred)
+
+app = FastAPI(lifespan=mongo_connect)
+
+app.include_router(admin_router)
 
 origins = [os.getenv("FRONTEND_URL", "")]
 app.add_middleware(
@@ -23,5 +26,5 @@ app.add_middleware(
 
 
 @app.get("/", status_code=200)
-def health_check():
+async def health_check():
     return

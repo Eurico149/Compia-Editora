@@ -6,9 +6,7 @@ from firebase_admin.auth import verify_id_token
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
-def get_firebase_user_from_token(
-    token: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)]
-) -> dict | None:
+def get_firebase_user(token: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)]) -> dict | None:
     try:
         if not token:
             raise ValueError("No token")
