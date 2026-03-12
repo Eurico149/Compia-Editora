@@ -7,16 +7,16 @@ admin_router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(
 
 
 @admin_router.get("/users")
-async def get_all_users(): return user_controller.get_all()
+async def get_all_users(): return await user_controller.get_all()
 
 @admin_router.get("/users/email/{email}")
-async def get_user_by_email(email: str): return user_controller.get_with_ref(email)
+async def get_user_by_email(email: str): return await user_controller.get_with_ref(email)
 
 @admin_router.get("/users/{uid}")
-async def get_user(uid: str): return user_controller.get(uid)
+async def get_user(uid: str): return await user_controller.get(uid)
 
 @admin_router.patch("/users/{uid}/role/{role}")
-async def change_user_role(uid: str, role: str): return user_controller.change_role(uid, role)
+async def change_user_role(uid: str, role: str): return await user_controller.change_role(uid, role)
 
 @admin_router.delete("/users/{uid}")
-async def delete_user(uid: str): return user_controller.delete(uid)
+async def delete_user(uid: str): return await user_controller.delete(uid)

@@ -7,7 +7,7 @@ class Produto(Document):
     image_url: Optional[str] = ""
     description: Optional[str] = ""
     content: str
-    tags: list[str] = []
+    tags: Indexed(list[str]) = []
     price: float
     author: str
     type: Literal["fisico", "ebook", "kit"]
