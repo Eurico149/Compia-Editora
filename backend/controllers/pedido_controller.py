@@ -1,7 +1,8 @@
 from fastapi import HTTPException
 from dtos import PedidoDTO
 from exceptions import CompiaException
-from services import pedido_service
+from models import Endereco
+from services import pedido_service, carrinho_service
 import os
 
 
@@ -28,10 +29,13 @@ async def get(uid: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-async def create(pedido_dto: PedidoDTO, current_user: dict):
+async def create(endereco: Endereco, current_user: dict):
     try:
-        cont = sum(item.quantidade for item in pedido_dto.produtos)
-        frete = await pedido_service.calcular_frete(os.getenv("MELHOR_ENVIO_CEP_BASE"), pedido_dto.endereco.cep, cont)
+        carrinho = await carrinho_service.get(current_user.get('uid'))
+
+        cont = sum(item.quantidade for item in carrinho.produtos)
+
+        frete = await pedido_service.calcular_frete(os.getenv("MELHOR_ENVIO_CEP_BASE"), endereco.cep, cont)
 
         if isinstance(frete, list) and len(frete) > 0:
 
@@ -44,7 +48,7 @@ async def create(pedido_dto: PedidoDTO, current_user: dict):
         else:
             raise HTTPException(status_code=400, detail="Erro ao calcular o frete ou formato de resposta inesperado.")
 
-        pedido = await pedido_service.create(pedido_dto, current_user, valor_frete)
+        pedido = await pedido_service.create(carrinho, current_user, valor_frete)
         return pedido
     except CompiaException as ce:
         raise HTTPException(status_code=400, detail=str(ce))

@@ -1,6 +1,6 @@
 from dtos import PedidoDTO
 from exceptions import CompiaException
-from models import Produto, ItemPedido, Pedido
+from models import Produto, ItemPedido, Pedido, Carrinho
 from beanie.operators import In
 import uuid
 import os
@@ -22,8 +22,8 @@ async def get_all_by_user_uid(user_uid: str):
     return await Pedido.find(Pedido.user_uuid == user_uid).to_list()
 
 
-async def create(pedido_dto: PedidoDTO, current_user: dict, valor_frete: float):
-    uuids_enviados = [item.produto_uuid for item in pedido_dto.produtos]
+async def create(carrinho: Carrinho, current_user: dict, valor_frete: float):
+    uuids_enviados = [item.produto_uuid for item in carrinho.produtos]
 
     produtos_banco = await Produto.find(In(Produto.produto_uuid, uuids_enviados)).to_list()
 
@@ -35,7 +35,7 @@ async def create(pedido_dto: PedidoDTO, current_user: dict, valor_frete: float):
     itens_pedido = []
     valor_total_produtos = 0.0
 
-    for item_dto in pedido_dto.produtos:
+    for item_dto in carrinho.produtos:
         produto_real = mapa_produtos[item_dto.produto_uuid]
 
         item = ItemPedido(
@@ -52,12 +52,13 @@ async def create(pedido_dto: PedidoDTO, current_user: dict, valor_frete: float):
         pedido_uuid=str(uuid.uuid4()),
         user_uuid=current_user.get('uid'),
         produtos=itens_pedido,
-        endereco=pedido_dto.endereco,
+        endereco=carrinho.endereco,
         frete=valor_frete,
         total=valor_total_produtos + valor_frete,
     )
 
     await pedido.insert()
+    await carrinho.delete()
 
     return pedido
 
