@@ -1,8 +1,7 @@
 from fastapi import HTTPException
-from dtos import PedidoDTO
 from exceptions import CompiaException
 from models import Endereco
-from services import pedido_service, carrinho_service
+from services import pedido_service, carrinho_service, smtp_service
 import os
 
 
@@ -48,7 +47,8 @@ async def create(endereco: Endereco, current_user: dict):
         else:
             raise HTTPException(status_code=400, detail="Erro ao calcular o frete ou formato de resposta inesperado.")
 
-        pedido = await pedido_service.create(carrinho, current_user, valor_frete)
+        pedido = await pedido_service.create(carrinho, current_user, "pix", valor_frete, endereco)
+        await smtp_service.enviar_email_confirmacao(current_user.get("email"), pedido.pedido_uuid)
         return pedido
     except CompiaException as ce:
         raise HTTPException(status_code=400, detail=str(ce))

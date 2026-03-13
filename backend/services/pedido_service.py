@@ -1,6 +1,5 @@
-from dtos import PedidoDTO
 from exceptions import CompiaException
-from models import Produto, ItemPedido, Pedido, Carrinho
+from models import Produto, ItemPedido, Pedido, Carrinho, Endereco
 from beanie.operators import In
 import uuid
 import os
@@ -22,7 +21,7 @@ async def get_all_by_user_uid(user_uid: str):
     return await Pedido.find(Pedido.user_uuid == user_uid).to_list()
 
 
-async def create(carrinho: Carrinho, current_user: dict, valor_frete: float):
+async def create(carrinho: Carrinho, current_user: dict, pagamento: str, valor_frete: float, endereco: Endereco):
     uuids_enviados = [item.produto_uuid for item in carrinho.produtos]
 
     produtos_banco = await Produto.find(In(Produto.produto_uuid, uuids_enviados)).to_list()
@@ -52,9 +51,10 @@ async def create(carrinho: Carrinho, current_user: dict, valor_frete: float):
         pedido_uuid=str(uuid.uuid4()),
         user_uuid=current_user.get('uid'),
         produtos=itens_pedido,
-        endereco=carrinho.endereco,
+        endereco=endereco,
         frete=valor_frete,
         total=valor_total_produtos + valor_frete,
+        pagamento=pagamento
     )
 
     await pedido.insert()

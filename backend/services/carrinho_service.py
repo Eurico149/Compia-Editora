@@ -59,7 +59,7 @@ async def decrement(itemDTO: ItemPedidoDTO, user_uid: str):
 
 
 async def get(user_uid: str):
-    carrinho = Carrinho.find_one(Carrinho.user_uuid == user_uid)
+    carrinho = await Carrinho.find_one(Carrinho.user_uuid == user_uid)
 
     if not carrinho:
         carrinho = Carrinho(user_uuid=user_uid, produtos=[])

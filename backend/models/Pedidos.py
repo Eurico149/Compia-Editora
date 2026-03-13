@@ -11,6 +11,7 @@ class Pedido(Document):
     user_uuid: Indexed(str)
     produtos: list[ItemPedido]
     endereco: Endereco
+    pagamento: Literal["cartao_credito", "boleto", "pix"]
     frete: float
     total: float
     desconto: float = 0
