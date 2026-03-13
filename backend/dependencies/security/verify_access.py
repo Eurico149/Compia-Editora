@@ -11,6 +11,4 @@ def verify_access(allowed_roles: List[str]):
         if user_role not in allowed_roles:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
 
-        return current_user
-
     return role_checker

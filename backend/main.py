@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from configs import mongo_connect
 from dependencies.security import get_firebase_user
-from routers import admin_router, catalogo_router, editor_router
+from routers import admin_router, catalogo_router, editor_router, cliente_router
 import firebase_admin
 import os
 
@@ -21,6 +21,7 @@ app = FastAPI(
 app.include_router(admin_router)
 app.include_router(catalogo_router)
 app.include_router(editor_router)
+app.include_router(cliente_router)
 
 origins = [os.getenv("FRONTEND_URL", "")]
 app.add_middleware(

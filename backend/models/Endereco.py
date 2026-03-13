@@ -1,9 +1,8 @@
-from beanie import Document, Indexed
 from typing import Optional
+from pydantic import BaseModel
 
 
-class Endereco(Document):
-    user_uuid: Indexed(str)
+class Endereco(BaseModel):
     rua: str
     numero: int
     bairro: str
