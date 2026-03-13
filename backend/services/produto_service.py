@@ -1,8 +1,9 @@
 from beanie.operators import RegEx
 from dtos import ProdutoDTO
-from models import Produto
+from models import Produto, Pedido
 from exceptions import CompiaException
 import uuid
+import io
 
 
 async def get(uid: str):
@@ -61,3 +62,28 @@ async def delete(uid: str):
         raise CompiaException("product not found")
 
     await produto.delete()
+
+
+def generate_ebook(content: str):
+    texto_em_bytes = content.encode('utf-8')
+    return io.BytesIO(texto_em_bytes)
+
+
+async def get_user_ebook(user_uuid: str, produto_uuid: str):
+    pedido = await Pedido.find_one({
+        "user_uuid": user_uuid,
+        "produtos.produto_uuid": produto_uuid
+    })
+
+    if not pedido:
+        raise CompiaException("user has not purchased this product")
+
+    produto = await Produto.find_one(Produto.produto_uuid == produto_uuid)
+
+    if not produto:
+        raise CompiaException("product not found")
+
+    if produto.type != "ebook":
+        raise CompiaException("product is not an ebook")
+
+    return produto

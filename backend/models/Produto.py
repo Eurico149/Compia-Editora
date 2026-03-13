@@ -12,4 +12,4 @@ class Produto(Document):
     price: float
     author: str
     type: Literal["fisico", "ebook", "kit"]
-    estoque: Optional[int] = None
+    estoque: Optional[int] = 0

@@ -1,5 +1,5 @@
 from fastapi import Depends, APIRouter
-from controllers import pedido_controller, carrinho_controller
+from controllers import pedido_controller, carrinho_controller, produto_controller
 from dependencies.security import verify_access, get_firebase_user
 from dtos import PedidoDTO
 from dtos.ItemPedidoDTO import ItemPedidoDTO
@@ -35,3 +35,7 @@ async def get_carrinho(current_user: dict = Depends(get_firebase_user)):
 @cliente_router.post("/carrinho/decrement")
 async def decrement_carrinho(itemDTO: ItemPedidoDTO, current_user: dict = Depends(get_firebase_user)):
     return await carrinho_controller.decrement(itemDTO, current_user)
+
+@cliente_router.get("/ebook/{produto_uuid}")
+async def get_ebook(produto_uuid: str, current_user: dict = Depends(get_firebase_user)):
+    return await produto_controller.get_ebook(produto_uuid, current_user)
