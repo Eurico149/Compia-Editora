@@ -48,7 +48,7 @@ def change_role(uid: str, new_role: str):
     try:
         user_service.change_role(uid, new_role)
         return {
-            "message": f"Role changed to {new_1role}"
+            "message": f"Role changed to {new_role}"
         }
     except UserNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)

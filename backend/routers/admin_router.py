@@ -3,20 +3,24 @@ from dependencies.security import verify_access
 from controllers import user_controller
 
 
-admin_router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(verify_access(['admin']))])
+admin_router = APIRouter(
+    prefix="/admin",
+    tags=["admin"],
+    dependencies=[Depends(verify_access(['admin']))]
+)
 
 
 @admin_router.get("/users")
-async def get_all_users(): return await user_controller.get_all()
+def get_all_users(): return user_controller.get_all()
 
 @admin_router.get("/users/email/{email}")
-async def get_user_by_email(email: str): return await user_controller.get_with_ref(email)
+def get_user_by_email(email: str): return user_controller.get_by_email(email)
 
 @admin_router.get("/users/{uid}")
-async def get_user(uid: str): return await user_controller.get(uid)
+def get_user(uid: str): return user_controller.get(uid)
 
 @admin_router.patch("/users/{uid}/role/{role}")
-async def change_user_role(uid: str, role: str): return await user_controller.change_role(uid, role)
+def change_user_role(uid: str, role: str): return user_controller.change_role(uid, role)
 
 @admin_router.delete("/users/{uid}")
-async def delete_user(uid: str): return await user_controller.delete(uid)
+def delete_user(uid: str): return user_controller.delete(uid)
