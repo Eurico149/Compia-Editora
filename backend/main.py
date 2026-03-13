@@ -1,14 +1,11 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
 from configs import mongo_connect
 from dependencies.security import get_firebase_user
 from routers import admin_router, catalogo_router, editor_router, cliente_router
 import firebase_admin
 import os
 
-
-load_dotenv()
 
 cred = firebase_admin.credentials.Certificate("compia-editora-firebase-cred.json")
 firebase_admin.initialize_app(cred)
