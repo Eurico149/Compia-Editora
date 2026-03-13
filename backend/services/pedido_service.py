@@ -7,6 +7,21 @@ import os
 import httpx
 
 
+async def get(uid: str):
+    pedido = await Pedido.find_one(Pedido.pedido_uuid == uid)
+    if not pedido:
+        raise CompiaException("pedido not found")
+    return pedido
+
+
+async def get_all():
+    return await Pedido.find_all().to_list()
+
+
+async def get_all_by_user_uid(user_uid: str):
+    return await Pedido.find(Pedido.user_uuid == user_uid).to_list()
+
+
 async def create(pedido_dto: PedidoDTO, current_user: dict, valor_frete: float):
     uuids_enviados = [item.produto_uuid for item in pedido_dto.produtos]
 

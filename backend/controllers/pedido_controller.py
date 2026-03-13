@@ -5,6 +5,29 @@ from services import pedido_service
 import os
 
 
+async def get_all():
+    try:
+        return await pedido_service.get_all()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+async def get_all_by_user_uid(current_user: dict):
+    try:
+        return await pedido_service.get_all_by_user_uid(current_user.get("uid"))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+async def get(uid: str):
+    try:
+        return await pedido_service.get(uid)
+    except CompiaException as ce:
+        raise HTTPException(status_code=400, detail=str(ce))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 async def create(pedido_dto: PedidoDTO, current_user: dict):
     try:
         cont = sum(item.quantidade for item in pedido_dto.produtos)

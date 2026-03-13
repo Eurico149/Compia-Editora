@@ -1,10 +1,6 @@
 from pydantic import BaseModel
 from models import Endereco
-
-
-class ItemPedidoDTO(BaseModel):
-    produto_uuid: str
-    quantidade: int
+from .ItemPedidoDTO import ItemPedidoDTO
 
 
 class PedidoDTO(BaseModel):
