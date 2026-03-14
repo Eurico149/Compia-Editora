@@ -1,12 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { catalogo } from "@/lib/api";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { Search, Book } from "lucide-react";
+import { Search, Book, X } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface Produto {
   produto_uuid: string;
@@ -20,36 +21,36 @@ interface Produto {
 }
 
 export default function CatalogoPage() {
-  const [searchParams] = useSearchParams();
-  const tagFilter = searchParams.get("tag");
   const [search, setSearch] = useState("");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  const FIXED_TAGS = [
+    "Machine Learning", "Deep Learning", "Natural Language Processing",
+    "Computer Vision", "Reinforcement Learning", "Robotics",
+  ];
 
   const { data, isLoading } = useQuery({
-    queryKey: ["catalogo", tagFilter],
-    queryFn: () => (tagFilter ? catalogo.getByTag(tagFilter) : catalogo.getAll()),
+    queryKey: ["catalogo"],
+    queryFn: () => catalogo.getAll(),
   });
 
   const produtos = (Array.isArray(data) ? data : []) as Produto[];
-  const filtered = produtos.filter(
-    (p) =>
+  const filtered = produtos.filter((p) => {
+    const matchesSearch =
       p.name?.toLowerCase().includes(search.toLowerCase()) ||
-      p.author?.toLowerCase().includes(search.toLowerCase())
-  );
+      p.author?.toLowerCase().includes(search.toLowerCase());
+    const matchesTags =
+      selectedTags.length === 0 ||
+      selectedTags.some((tag) => p.tags?.includes(tag));
+    return matchesSearch && matchesTags;
+  });
 
   const typeLabel: Record<string, string> = { fisico: "Físico", ebook: "E-book", kit: "Kit" };
 
   return (
     <div className="container py-8">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-2xl font-bold">Catálogo</h1>
-          {tagFilter && (
-            <p className="text-muted-foreground mt-1">
-              Filtrando por: <Badge variant="secondary">{tagFilter}</Badge>
-              <Link to="/" className="ml-2 text-primary text-sm underline">Limpar</Link>
-            </p>
-          )}
-        </div>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+        <h1 className="text-2xl font-bold">Catálogo</h1>
         <div className="relative w-full sm:w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -59,6 +60,32 @@ export default function CatalogoPage() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-8">
+        {FIXED_TAGS.map((tag) => (
+          <Badge
+            key={tag}
+            variant={selectedTags.includes(tag) ? "default" : "outline"}
+            className="cursor-pointer select-none"
+            onClick={() =>
+              setSelectedTags((prev) =>
+                prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+              )
+            }
+          >
+            {tag}
+          </Badge>
+        ))}
+        {selectedTags.length > 0 && (
+          <Badge
+            variant="secondary"
+            className="cursor-pointer gap-1"
+            onClick={() => setSelectedTags([])}
+          >
+            <X className="h-3 w-3" /> Limpar
+          </Badge>
+        )}
       </div>
 
       {isLoading ? (

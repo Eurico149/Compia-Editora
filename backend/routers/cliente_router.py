@@ -20,6 +20,10 @@ async def create_pedido(endereco: Endereco, current_user: dict = Depends(get_fir
 async def get_pedidos(current_user: dict = Depends(get_firebase_user)):
     return await pedido_controller.get_all_by_user_uid(current_user)
 
+@cliente_router.get("/pedido/{pedido_uuid}")
+async def get_pedido(pedido_uuid: str, current_user: dict = Depends(get_firebase_user)):
+    return await pedido_controller.get(pedido_uuid, current_user)
+
 @cliente_router.post("/carrinho")
 async def add_to_carrinho(itemDTO: ItemPedidoDTO, current_user: dict = Depends(get_firebase_user)):
     return await carrinho_controller.add(itemDTO, current_user)
