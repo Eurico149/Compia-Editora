@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
 import AppLayout from "@/components/AppLayout";
+import Index from "@/pages/Index";
 import CatalogoPage from "@/pages/CatalogoPage";
 import ProdutoPage from "@/pages/ProdutoPage";
 import LoginPage from "@/pages/LoginPage";
@@ -39,14 +40,20 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route element={<AppLayout />}>
-              <Route path="/" element={<CatalogoPage />} />
+              {/* Home pública */}
+              <Route path="/" element={<Index />} />
+              {/* Catálogo público */}
+              <Route path="/catalogo" element={<CatalogoPage />} />
+              {/* Produto público */}
               <Route path="/produto/:uid" element={<ProdutoPage />} />
+              {/* Auth */}
               <Route path="/login" element={<LoginPage />} />
+              {/* Rotas protegidas */}
               <Route path="/carrinho" element={<ProtectedRoute><CarrinhoPage /></ProtectedRoute>} />
               <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
-              <Route path="/pedidos" element={<ProtectedRoute><PedidosPage /></ProtectedRoute>} />
-              <Route path="/editor" element={<ProtectedRoute roles={["editor", "admin"]}><EditorPage /></ProtectedRoute>} />
-              <Route path="/admin" element={<ProtectedRoute roles={["admin"]}><AdminPage /></ProtectedRoute>} />
+              <Route path="/pedidos"  element={<ProtectedRoute><PedidosPage /></ProtectedRoute>} />
+              <Route path="/editor"   element={<ProtectedRoute roles={["editor", "admin"]}><EditorPage /></ProtectedRoute>} />
+              <Route path="/admin"    element={<ProtectedRoute roles={["admin"]}><AdminPage /></ProtectedRoute>} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

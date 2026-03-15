@@ -8,7 +8,7 @@ import { Trash2, Search, Users } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface UserData {
   uid: string;
@@ -16,6 +16,12 @@ interface UserData {
   role?: string;
   [key: string]: unknown;
 }
+
+const roleColor: Record<string, string> = {
+  admin:  "bg-red-500/10 text-red-400 border-red-500/30",
+  editor: "bg-violet-500/10 text-violet-400 border-violet-500/30",
+  user:   "bg-slate-700 text-slate-300 border-slate-600",
+};
 
 export default function AdminUsers() {
   const queryClient = useQueryClient();
@@ -53,58 +59,62 @@ export default function AdminUsers() {
   if (isLoading) {
     return (
       <div className="space-y-3">
-        {[1, 2, 3].map((i) => <Skeleton key={i} className="h-12 w-full" />)}
+        {[1, 2, 3].map((i) => <Skeleton key={i} className="h-12 w-full rounded-lg bg-slate-800" />)}
       </div>
     );
   }
 
   return (
     <div>
-      <div className="flex items-center gap-4 mb-4">
+      <div className="flex items-center gap-4 mb-5">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
           <Input
             placeholder="Buscar por email..."
-            className="pl-9"
+            className="pl-9 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus:border-violet-500"
             value={searchEmail}
             onChange={(e) => setSearchEmail(e.target.value)}
           />
         </div>
+        <span className="text-sm text-slate-500">{filtered.length} usuário(s)</span>
       </div>
 
       {filtered.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          <Users className="h-10 w-10 mx-auto mb-3" />
-          <p>Nenhum usuário encontrado</p>
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-700 bg-slate-900/30 py-16 text-center">
+          <Users className="h-10 w-10 text-slate-700 mb-3" />
+          <p className="text-white font-medium">Nenhum usuário encontrado</p>
         </div>
       ) : (
-        <div className="border rounded-lg overflow-hidden">
+        <div className="rounded-xl border border-slate-800 overflow-hidden">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Email</TableHead>
-                <TableHead>UID</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead className="w-20">Ações</TableHead>
+              <TableRow className="border-slate-800 hover:bg-transparent">
+                <TableHead className="text-slate-400">Email</TableHead>
+                <TableHead className="text-slate-400">UID</TableHead>
+                <TableHead className="text-slate-400">Role</TableHead>
+                <TableHead className="w-16 text-slate-400">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.map((user) => (
-                <TableRow key={user.uid}>
-                  <TableCell>{user.email || "—"}</TableCell>
-                  <TableCell className="font-mono text-xs text-muted-foreground">{user.uid.slice(0, 12)}...</TableCell>
+                <TableRow key={user.uid} className="border-slate-800 hover:bg-slate-800/50">
+                  <TableCell className="text-slate-200">{user.email || "—"}</TableCell>
+                  <TableCell className="font-mono text-xs text-slate-500">{user.uid.slice(0, 12)}...</TableCell>
                   <TableCell>
                     <Select
                       value={user.role || "user"}
                       onValueChange={(role) => roleMutation.mutate({ uid: user.uid, role })}
                     >
-                      <SelectTrigger className="w-32 h-8">
+                      <SelectTrigger className={cn(
+                        "w-32 h-7 text-xs rounded-full border",
+                        roleColor[user.role || "user"] || roleColor["user"]
+                      )}>
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="user">user</SelectItem>
-                        <SelectItem value="editor">editor</SelectItem>
-                        <SelectItem value="admin">admin</SelectItem>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="user" className="text-white">user</SelectItem>
+                        <SelectItem value="editor" className="text-white">editor</SelectItem>
+                        <SelectItem value="admin" className="text-white">admin</SelectItem>
                       </SelectContent>
                     </Select>
                   </TableCell>
@@ -112,7 +122,7 @@ export default function AdminUsers() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="text-destructive h-8 w-8"
+                      className="text-slate-500 hover:text-red-400 hover:bg-red-500/10 h-8 w-8"
                       onClick={() => {
                         if (confirm("Remover este usuário?")) deleteMutation.mutate(user.uid);
                       }}

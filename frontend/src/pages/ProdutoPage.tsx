@@ -3,10 +3,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { catalogo, cliente } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ShoppingCart, Book, ArrowLeft } from "lucide-react";
+import { ShoppingCart, Book, ArrowLeft, Tag } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface Produto {
   produto_uuid: string;
@@ -42,18 +42,25 @@ export default function ProdutoPage() {
 
   const produto = data as Produto | undefined;
   const typeLabel: Record<string, string> = { fisico: "Físico", ebook: "E-book", kit: "Kit" };
+  const typeColor: Record<string, string> = {
+    fisico: "bg-blue-500/10 text-blue-400 border-blue-500/30",
+    ebook: "bg-violet-500/10 text-violet-400 border-violet-500/30",
+    kit: "bg-amber-500/10 text-amber-400 border-amber-500/30",
+  };
 
   if (isLoading) {
     return (
-      <div className="container py-8 max-w-4xl">
-        <Skeleton className="h-8 w-48 mb-6" />
-        <div className="grid md:grid-cols-2 gap-8">
-          <Skeleton className="h-80 w-full rounded-lg" />
-          <div className="space-y-4">
-            <Skeleton className="h-8 w-3/4" />
-            <Skeleton className="h-5 w-1/2" />
-            <Skeleton className="h-5 w-1/4" />
-            <Skeleton className="h-24 w-full" />
+      <div className="bg-slate-950 min-h-screen">
+        <div className="container px-4 md:px-8 mx-auto py-8 max-w-4xl">
+          <Skeleton className="h-5 w-40 mb-6 bg-slate-800" />
+          <div className="grid md:grid-cols-2 gap-10">
+            <Skeleton className="h-80 w-full rounded-xl bg-slate-800" />
+            <div className="space-y-4">
+              <Skeleton className="h-6 w-3/4 bg-slate-800" />
+              <Skeleton className="h-5 w-1/2 bg-slate-800" />
+              <Skeleton className="h-8 w-1/3 bg-slate-800" />
+              <Skeleton className="h-24 w-full bg-slate-800" />
+            </div>
           </div>
         </div>
       </div>
@@ -62,59 +69,96 @@ export default function ProdutoPage() {
 
   if (!produto) {
     return (
-      <div className="container py-20 text-center text-muted-foreground">
-        <p className="text-lg">Produto não encontrado.</p>
-        <Link to="/" className="text-primary underline mt-2 inline-block">Voltar ao catálogo</Link>
+      <div className="bg-slate-950 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg text-slate-400 mb-4">Produto não encontrado.</p>
+          <Link to="/" className="text-violet-400 hover:text-violet-300 underline">
+            Voltar ao catálogo
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container py-8 max-w-4xl">
-      <Link to="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6">
-        <ArrowLeft className="h-4 w-4" /> Voltar ao catálogo
-      </Link>
+    <div className="bg-slate-950 min-h-screen">
+      <div className="container px-4 md:px-8 mx-auto py-8 max-w-4xl">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-violet-400 mb-8 transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" /> Voltar ao catálogo
+        </Link>
 
-      <div className="grid md:grid-cols-2 gap-8">
-        {produto.image_url ? (
-          <img src={produto.image_url} alt={produto.name} className="w-full rounded-lg object-cover max-h-96" />
-        ) : (
-          <div className="w-full h-80 bg-muted rounded-lg flex items-center justify-center">
-            <Book className="h-16 w-16 text-muted-foreground" />
-          </div>
-        )}
-
-        <div>
-          <Badge variant="outline" className="mb-2">{typeLabel[produto.type] || produto.type}</Badge>
-          <h1 className="text-2xl font-bold">{produto.name}</h1>
-          <p className="text-muted-foreground mt-1">por {produto.author}</p>
-          <p className="text-3xl font-bold text-primary mt-4">R$ {produto.price?.toFixed(2)}</p>
-
-          {produto.description && (
-            <p className="mt-4 text-muted-foreground leading-relaxed">{produto.description}</p>
-          )}
-
-          {produto.tags && produto.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-4">
-              {produto.tags.map((tag) => (
-                <Link key={tag} to={`/?tag=${tag}`}>
-                  <Badge variant="secondary">{tag}</Badge>
-                </Link>
-              ))}
+        <div className="grid md:grid-cols-2 gap-10">
+          {/* Image */}
+          {produto.image_url ? (
+            <div className="rounded-xl border border-slate-800 overflow-hidden bg-slate-900">
+              <img
+                src={produto.image_url}
+                alt={produto.name}
+                className="w-full h-full object-cover max-h-[420px]"
+              />
+            </div>
+          ) : (
+            <div className="rounded-xl border border-slate-800 bg-slate-900 flex items-center justify-center h-80">
+              <Book className="h-16 w-16 text-slate-600" />
             </div>
           )}
 
-          <div className="mt-6">
-            {isLoggedIn ? (
-              <Button onClick={() => addMutation.mutate()} disabled={addMutation.isPending} size="lg">
-                <ShoppingCart className="h-4 w-4 mr-2" />
-                {addMutation.isPending ? "Adicionando..." : "Adicionar ao carrinho"}
-              </Button>
-            ) : (
-              <Link to="/login">
-                <Button size="lg">Entrar para comprar</Button>
-              </Link>
+          {/* Info */}
+          <div className="flex flex-col">
+            <span className={cn(
+              "inline-flex w-fit rounded-full border px-3 py-1 text-xs font-medium mb-3",
+              typeColor[produto.type] || "border-slate-700 text-slate-400"
+            )}>
+              {typeLabel[produto.type] || produto.type}
+            </span>
+
+            <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">{produto.name}</h1>
+            <p className="text-slate-400 mb-4">
+              por <span className="text-slate-300 font-medium">{produto.author}</span>
+            </p>
+
+            <p className="text-4xl font-bold text-violet-400 mb-6">
+              R$ {produto.price?.toFixed(2)}
+            </p>
+
+            {produto.description && (
+              <p className="text-slate-300 leading-relaxed mb-6">{produto.description}</p>
             )}
+
+            {produto.tags && produto.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-6">
+                {produto.tags.map((tag) => (
+                  <Link key={tag} to={`/?tag=${tag}`}>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-slate-800 border border-slate-700 px-3 py-1 text-xs text-slate-400 hover:border-violet-500/40 hover:text-slate-300 transition-colors">
+                      <Tag className="h-3 w-3" />{tag}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            )}
+
+            <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-6 mt-auto">
+              {isLoggedIn ? (
+                <Button
+                  onClick={() => addMutation.mutate()}
+                  disabled={addMutation.isPending}
+                  size="lg"
+                  className="w-full bg-violet-600 hover:bg-violet-700 text-white font-semibold"
+                >
+                  <ShoppingCart className="h-4 w-4 mr-2" />
+                  {addMutation.isPending ? "Adicionando..." : "Adicionar ao Carrinho"}
+                </Button>
+              ) : (
+                <Link to="/login">
+                  <Button size="lg" className="w-full bg-violet-600 hover:bg-violet-700 text-white font-semibold">
+                    Entrar para comprar
+                  </Button>
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </div>

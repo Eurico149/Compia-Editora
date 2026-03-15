@@ -3,7 +3,7 @@ services:
   api:
     container_name: api_compia
     build: ./backend
-    restart: unless-stopped
+    restart: no
     environment:
       COMPIA_MONGO_URI: ${COMPIA_MONGO_URI}
       COMPIA_MONGO_DB: ${COMPIA_MONGO_DB}
@@ -13,19 +13,40 @@ services:
       COMPIA_SMTP_PASS: ${COMPIA_SMTP_PASS}
       COMPIA_MAIL_USERNAME: ${COMPIA_MAIL_USERNAME}
       COMPIA_MAIL_FROM: ${COMPIA_MAIL_FROM}
+      COMPIA_FIREBASE_TYPE: ${COMPIA_FIREBASE_TYPE}
+      COMPIA_FIREBASE_PROJECT_ID: ${COMPIA_FIREBASE_PROJECT_ID}
+      COMPIA_FIREBASE_PRIVATE_KEY_ID: ${COMPIA_FIREBASE_PRIVATE_KEY_ID}
+      COMPIA_FIREBASE_PRIVATE_KEY: ${COMPIA_FIREBASE_PRIVATE_KEY}
+      COMPIA_FIREBASE_CLIENT_EMAIL: ${COMPIA_FIREBASE_CLIENT_EMAIL}
+      COMPIA_FIREBASE_CLIENT_ID: ${COMPIA_FIREBASE_CLIENT_ID}
+      COMPIA_FIREBASE_AUTH_URI: ${COMPIA_FIREBASE_AUTH_URI}
+      COMPIA_FIREBASE_TOKEN_URI: ${COMPIA_FIREBASE_TOKEN_URI}
+      COMPIA_FIREBASE_AUTH_PROVIDER_X509_CERT_URL: ${COMPIA_FIREBASE_AUTH_PROVIDER_X509_CERT_URL}
+      COMPIA_FIREBASE_CLIENT_X509_CERT_URL: ${COMPIA_FIREBASE_CLIENT_X509_CERT_URL}
+      COMPIA_FIREBASE_UNIVERSE_DOMAIN: ${COMPIA_FIREBASE_UNIVERSE_DOMAIN}
     depends_on:
       - mongo
 
   front:
     container_name: compia_front
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        - VITE_FIREBASE_API_KEY=${VITE_FIREBASE_API_KEY}
+        - VITE_FIREBASE_AUTH_DOMAIN=${VITE_FIREBASE_AUTH_DOMAIN}
+        - VITE_FIREBASE_PROJECT_ID=${VITE_FIREBASE_PROJECT_ID}
+        - VITE_FIREBASE_STORAGE_BUCKET=${VITE_FIREBASE_STORAGE_BUCKET}
+        - VITE_FIREBASE_MESSAGING_SENDER_ID=${VITE_FIREBASE_MESSAGING_SENDER_ID}
+        - VITE_FIREBASE_APP_ID=${VITE_FIREBASE_APP_ID}
+        - VITE_FIREBASE_MEASUREMENT_ID=${VITE_FIREBASE_MEASUREMENT_ID}
+    restart: no
     volumes:
       - front_static:/web_files
 
   nginx:
     container_name: compia_nginx
     image: nginx:stable
-    restart: unless-stopped
+    restart: no
     ports:
       - "8080:80"
     volumes:
@@ -38,7 +59,7 @@ services:
   mongo:
     container_name: compia_mongo
     image: mongo:7.0
-    restart: unless-stopped
+    restart: no
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${COMPIA_MONGO_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${COMPIA_MONGO_PASSWORD}
@@ -48,7 +69,7 @@ services:
   mongo-express:
     container_name: compia_mongo_express
     image: mongo-express
-    restart: unless-stopped
+    restart: no
     ports:
       - "8081:8081"
     environment:

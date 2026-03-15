@@ -1,0 +1,70 @@
+name: CI.yml
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      short_sha: ${{ steps.vars.outputs.SHORT_SHA }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set short git commit SHA
+        id: vars
+        run: echo "SHORT_SHA=$(git rev-parse --short ${{ github.sha }})" >> $GITHUB_OUTPUT
+
+      - name: Configurar QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Docker Buildx config
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker Hub Login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & Push - Backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/compia-editora-backend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/compia-editora-backend:${{ steps.vars.outputs.SHORT_SHA }}
+
+      - name: Build e Push - Frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/compia-editora-frontend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/compia-editora-frontend:${{ steps.vars.outputs.SHORT_SHA }}
+          build-args: |
+            VITE_FIREBASE_API_KEY=${{ secrets.VITE_FIREBASE_API_KEY }}
+            VITE_FIREBASE_AUTH_DOMAIN=${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+            VITE_FIREBASE_PROJECT_ID=${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+            VITE_FIREBASE_STORAGE_BUCKET=${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+            VITE_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+            VITE_FIREBASE_APP_ID=${{ secrets.VITE_FIREBASE_APP_ID }}
+            VITE_FIREBASE_MEASUREMENT_ID=${{ secrets.VITE_FIREBASE_MEASUREMENT_ID }}
+
+  trigger-deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Private Deploy Workflow Trigger
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          repository: Eurico149/Compia-editora-infra
+          event-type: deploy
+          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ needs.build-and-push.outputs.short_sha }}"}'

@@ -4,7 +4,6 @@ import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
 import { BookOpen } from "lucide-react";
 
@@ -52,80 +51,90 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="text-center">
-          <BookOpen className="h-8 w-8 text-primary mx-auto mb-2" />
-          <CardTitle>
-            {isForgot ? "Recuperar Senha" : isRegister ? "Criar Conta" : "Entrar"}
-          </CardTitle>
-          <CardDescription>
+    <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center bg-slate-950 px-4 py-12">
+      <div className="w-full max-w-md space-y-8 rounded-xl border border-slate-800 bg-slate-900 p-10 shadow-2xl">
+        <div className="text-center">
+          <div className="mx-auto h-12 w-12 rounded-lg bg-violet-600 flex items-center justify-center">
+            <BookOpen className="h-6 w-6 text-white" />
+          </div>
+          <h2 className="mt-6 text-3xl font-bold tracking-tight text-white">
+            {isForgot ? "Recuperar Senha" : isRegister ? "Criar Conta" : "Bem-vindo de volta"}
+          </h2>
+          <p className="mt-2 text-sm text-slate-400">
             {isForgot
               ? "Informe seu email para recuperar a senha"
               : isRegister
               ? "Crie sua conta na COMPIA Editora"
               : "Acesse sua conta na COMPIA Editora"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-slate-300">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="seu@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus:border-violet-500 focus:ring-violet-500"
+            />
+          </div>
+
+          {!isForgot && (
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="password" className="text-slate-300">Senha</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
+                minLength={6}
+                className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus:border-violet-500 focus:ring-violet-500"
               />
             </div>
-            {!isForgot && (
-              <div className="space-y-2">
-                <Label htmlFor="password">Senha</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                />
-              </div>
-            )}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading
-                ? "Aguarde..."
-                : isForgot
-                ? "Enviar email"
-                : isRegister
-                ? "Criar conta"
-                : "Entrar"}
-            </Button>
-          </form>
+          )}
 
-          <div className="mt-4 text-center space-y-2">
-            {!isForgot && (
-              <button
-                type="button"
-                onClick={() => setIsRegister(!isRegister)}
-                className="text-sm text-primary hover:underline"
-              >
-                {isRegister ? "Já tem conta? Entrar" : "Não tem conta? Criar"}
-              </button>
-            )}
-            <br />
+          <Button
+            type="submit"
+            className="w-full bg-violet-600 hover:bg-violet-700 text-white font-semibold"
+            disabled={loading}
+          >
+            {loading
+              ? "Aguarde..."
+              : isForgot
+              ? "Enviar email"
+              : isRegister
+              ? "Criar conta"
+              : "Entrar"}
+          </Button>
+        </form>
+
+        <div className="mt-4 text-center space-y-3">
+          {!isForgot && (
+            <button
+              type="button"
+              onClick={() => setIsRegister(!isRegister)}
+              className="text-sm text-violet-400 hover:text-violet-300 transition-colors"
+            >
+              {isRegister ? "Já tem conta? Entrar" : "Não tem conta? Criar"}
+            </button>
+          )}
+          <div>
             <button
               type="button"
               onClick={() => { setIsForgot(!isForgot); setIsRegister(false); }}
-              className="text-sm text-muted-foreground hover:underline"
+              className="text-sm text-slate-500 hover:text-slate-400 transition-colors"
             >
               {isForgot ? "Voltar ao login" : "Esqueci minha senha"}
             </button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
